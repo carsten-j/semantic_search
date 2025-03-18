@@ -1,0 +1,8 @@
+fastapi[standard]
+fastembed
+pydantic
+qdrant_client
+requests
+polars
+langchain-text-splitters
+langchain-core
