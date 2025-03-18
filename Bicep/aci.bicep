@@ -1,7 +1,10 @@
 param location string
 param containerGroupName string
 param storageAccountName string
+param caddyFileFileShareName string
 param caddyDataFileShareName string
+param caddyConfigFileShareName string
+param qdrantFileShareName string
 
 var publicUrl = toLower('${containerGroupName}.${location}.azurecontainer.io')
 
@@ -26,7 +29,7 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2024-05-01-
             '--from'
             '${publicUrl}'
             '--to'
-            'localhost:3001'
+            'localhost:5000'
           ]
           resources: {
             requests: {
@@ -46,18 +49,46 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2024-05-01-
           ]
           volumeMounts: [
             {
+              name: caddyFileFileShareName
+              mountPath: '/etc/caddy'
+              readOnly: false
+            }
+            {
               name: caddyDataFileShareName
               mountPath: '/data'
+              readOnly: false
+            }
+            {
+              name: caddyConfigFileShareName
+              mountPath: '/config'
               readOnly: false
             }
           ]
         }
       }
       {
-        name: '${containerGroupName}-hello-world'
+        name: '${containerGroupName}-qdrant'
         properties: {
-          // https://github.com/Azure-Samples/aci-helloworld
-          image: 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+          image: 'qdrant/qdrant:latest'
+          resources: {
+            requests: {
+              cpu: 1
+              memoryInGB: 1
+            }
+          }
+          volumeMounts: [
+            {
+              name: qdrantFileShareName
+              mountPath: '/qdrant/data/'
+              readOnly: false
+            }
+          ]
+        }
+      }
+      {
+        name: '${containerGroupName}-api'
+        properties: {
+          image: 'carstenj/embedding-api:latest'
           resources: {
             requests: {
               cpu: 1
@@ -67,12 +98,12 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2024-05-01-
           environmentVariables: [
             {
               name: 'PORT'
-              value: '3001'
+              value: '5000'
             }
           ]
           ports: [
             {
-              port: 3001
+              port: 5000
               protocol: 'TCP'
             }
           ]
@@ -97,9 +128,36 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2024-05-01-
     }
     volumes: [
       {
+        name: caddyFileFileShareName
+        azureFile: {
+          shareName: caddyFileFileShareName
+          storageAccountName: storageAccount.name
+          storageAccountKey: storageAccount.listKeys().keys[0].value
+          readOnly: false
+        }
+      }
+      {
         name: caddyDataFileShareName
         azureFile: {
           shareName: caddyDataFileShareName
+          storageAccountName: storageAccount.name
+          storageAccountKey: storageAccount.listKeys().keys[0].value
+          readOnly: false
+        }
+      }
+      {
+        name: caddyConfigFileShareName
+        azureFile: {
+          shareName: caddyConfigFileShareName
+          storageAccountName: storageAccount.name
+          storageAccountKey: storageAccount.listKeys().keys[0].value
+          readOnly: false
+        }
+      }
+      {
+        name: qdrantFileShareName
+        azureFile: {
+          shareName: qdrantFileShareName
           storageAccountName: storageAccount.name
           storageAccountKey: storageAccount.listKeys().keys[0].value
           readOnly: false

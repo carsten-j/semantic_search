@@ -55,6 +55,16 @@ resource fileServices 'Microsoft.Storage/storageAccounts/fileServices@2023-05-01
   }
 }
 
+resource caddyFileFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01' = {
+  parent: fileServices
+  name: '${containerGroupName}-caddyfile'
+  properties: {
+    shareQuota: 1
+    accessTier: 'TransactionOptimized'
+    enabledProtocols: 'SMB'
+  }
+}
+
 resource caddyDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01' = {
   parent: fileServices
   name: '${containerGroupName}-caddydata'
@@ -65,4 +75,27 @@ resource caddyDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shar
   }
 }
 
+resource caddyConfigFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01' = {
+  parent: fileServices
+  name: '${containerGroupName}-caddyconfig'
+  properties: {
+    shareQuota: 1
+    accessTier: 'TransactionOptimized'
+    enabledProtocols: 'SMB'
+  }
+}
+
+resource qdrantFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01' = {
+  parent: fileServices
+  name: '${containerGroupName}-qdrant'
+  properties: {
+    shareQuota: 1
+    accessTier: 'TransactionOptimized'
+    enabledProtocols: 'SMB'
+  }
+}
+
+output caddyFileFileShareName string = caddyFileFileShare.name
 output caddyDataFileShareName string = caddyDataFileShare.name
+output caddyConfigFileShareName string = caddyConfigFileShare.name
+output qdrantFileShareName string = qdrantFileShare.name

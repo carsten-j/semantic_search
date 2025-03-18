@@ -49,9 +49,11 @@ def create_chunks(
     return chunks
 
 
+sparse_model_name = "Qdrant/bm25"
+sparse_model = SparseTextEmbedding(model_name=sparse_model_name, batch_size=32)
+
+
 def make_sparse_embedding(texts: list[str]) -> list[SparseEmbedding]:
-    sparse_model_name = "Qdrant/bm25"
-    sparse_model = SparseTextEmbedding(model_name=sparse_model_name, batch_size=32)
     return list(sparse_model.embed(texts, batch_size=256))
 
 
@@ -101,7 +103,17 @@ def make_points(df: pl.DataFrame) -> list[PointStruct]:
     return points
 
 
-def driver(page: Page) -> list[PointStruct]:
+def _create_points(pages: list[Pages]) -> list[PointStruct]:
+    docs = []
+    for page in pages:
+        docs.append(Document(page_content=page.page_content, metadata=page.metadata))
+    chunks = create_chunks(docs)
+    df = create_dataframe(chunks)
+    points = make_points(df)
+    return points
+
+
+def create_points(page: Page) -> list[PointStruct]:
     docs = Document(page_content=page.page_content, metadata=page.metadata)
     chunks = create_chunks([docs])
     df = create_dataframe(chunks)

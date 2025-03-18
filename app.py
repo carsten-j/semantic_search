@@ -1,4 +1,5 @@
 import qdrant_client
+from fastapi import FastAPI
 from fastembed import SparseEmbedding
 from pydantic import BaseModel
 from qdrant_client.models import (
@@ -12,7 +13,6 @@ from qdrant_client.models import (
 )
 
 import create_embeddings as ce
-from fastapi import FastAPI
 
 # https://blog.futuresmart.ai/building-an-async-similarity-search-system-from-scratch-with-fastapi-and-qdrant-vectordb
 
@@ -102,7 +102,7 @@ async def read_root():
 
 @app.post("/document")
 async def create_document(page: ce.Page):
-    points = ce.driver(page)
+    points = ce.create_points(page)
 
     batch_size = 1000
 

@@ -1,5 +1,5 @@
 @description('The location to deploy the resources to.')
-param location string = 'australiaeast'
+param location string = 'swedencentral'
 
 @description('The name of the container group to create.')
 param containerGroupName string
@@ -25,5 +25,8 @@ module aci './aci.bicep' = {
     storageAccountName: storageAccountName
     containerGroupName: containerGroupName
     caddyDataFileShareName: storageAccount.outputs.caddyDataFileShareName
+    caddyFileFileShareName: storageAccount.outputs.caddyFileFileShareName
+    caddyConfigFileShareName: storageAccount.outputs.caddyConfigFileShareName
+    qdrantFileShareName: storageAccount.outputs.qdrantFileShareName
   }
 }

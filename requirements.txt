@@ -6,3 +6,5 @@ requests
 polars
 langchain-text-splitters
 langchain-core
+langchain-community
+PyMuPDF
